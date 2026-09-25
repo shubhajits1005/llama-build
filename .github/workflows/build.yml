@@ -1,4 +1,4 @@
-name: Build ARM32 Llama.cpp
+name: Build ARM32 Llama.cpp Fully Static
 
 on: [workflow_dispatch]
 
@@ -17,13 +17,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y g++-arm-linux-gnueabihf cmake
 
-      - name: Configure CMake for ARM32
+      - name: Configure CMake for Fully Static ARM32
         run: |
           cmake -B build \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_SYSTEM_PROCESSOR=armv7 \
             -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
             -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+            -DCMAKE_EXE_LINKER_FLAGS="-static" \
+            -DBUILD_SHARED_LIBS=OFF \
             -DLLAMA_BUILD_TESTS=OFF \
             -DGGML_OPENMP=OFF
 
@@ -33,5 +35,5 @@ jobs:
       - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: llama-cli-armv7
+          name: llama-cli-armv7-static
           path: build/bin/llama-cli
