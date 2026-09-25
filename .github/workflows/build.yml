@@ -1,0 +1,37 @@
+name: Build ARM32 Llama.cpp
+
+on: [workflow_dispatch]
+
+jobs:
+    build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: ggml-org/llama.cpp
+          ref: master
+
+      - name: Install ARM32 Cross-Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-arm-linux-gnueabihf cmake
+
+      - name: Configure CMake for ARM32
+        run: |
+          cmake -B build \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=armv7 \
+            -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
+            -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+            -DLLAMA_BUILD_TESTS=OFF \
+            -DGGML_OPENMP=OFF
+
+      - name: Build Llama.cpp
+        run: cmake --build build --config Release -j4
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: llama-cli-armv7
+          path: build/bin/llama-cli
